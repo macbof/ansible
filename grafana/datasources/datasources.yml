@@ -1,0 +1,4 @@
+datasources:
+  - name: Prometheus
+    url: http://localhost:$PORT
+    user: $USER

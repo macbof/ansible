@@ -1,0 +1,42 @@
+version: '3'
+services:
+  prometheus:
+    image: "prometheus:v0.1"
+    build:
+      context: Prometheus/
+      dockerfile: Dockerfile
+    hostname: Prometheus
+    command: --config.file=/var/data/prometheus.yml --web.external-url=http://localhost/prometheus
+    volumes:
+       - /var/data/prometheus:/var/data/:z
+
+  alertmanager:
+    image: "alertmanager:v0.1"
+    build:
+      context: alertmanager-d/
+      dockerfile: Dockerfile
+    hostname: Alertmanager
+
+  grafana:
+    image: "grafana:v0.1"
+    build:
+      context: Grafana/
+      dockerfile: Dockerfile
+    hostname: Grafana
+    volumes:
+      - /var/data/grafana/:/etc/grafana/provisioning/
+    ports:
+      - "3000:3000"
+
+  nginx:
+    image: "nginx:v0.1"
+    build:
+      context: nginx/
+      dockerfile: Dockerfile
+    hostname: nginx
+    volumes: 
+      - /etc/nginx/certs/:/etc/nginx/certs/
+    ports:
+      - 8080:8080  
+      - 8443:8443
+      - 8444:8444
