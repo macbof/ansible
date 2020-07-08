@@ -1,0 +1,155 @@
+# Generation of Kubernetes YAML is still under development!
+#
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-1.6.4
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2020-07-08T10:04:06Z"
+  labels:
+    app: prom
+  name: prom
+spec:
+  containers:
+  - command:
+    - --storage.path=/alertmanager
+    env:
+    - name: PATH
+      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: HOSTNAME
+      value: Alertmanager
+    - name: container
+      value: podman
+    image: localhost/alertmanager:v0.1
+    name: promalertmanager1
+    ports:
+    - containerPort: 8443
+      hostPort: 8443
+      protocol: TCP
+    - containerPort: 8080
+      hostPort: 8080
+      protocol: TCP
+    - containerPort: 3000
+      hostPort: 3000
+      protocol: TCP
+    - containerPort: 8444
+      hostPort: 8444
+      protocol: TCP
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities: {}
+      privileged: false
+      readOnlyRootFilesystem: false
+      runAsUser: 65534
+    workingDir: /etc/alertmanager
+  - command:
+    - nginx
+    - -g
+    - daemon off;
+    env:
+    - name: PATH
+      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: HOSTNAME
+      value: nginx
+    - name: container
+      value: podman
+    image: localhost/nginx:v0.1
+    name: promnginx1
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities: {}
+      privileged: false
+      readOnlyRootFilesystem: false
+      runAsUser: 999
+    volumeMounts:
+    - mountPath: /etc/nginx/certs
+      name: etc-nginx-certs
+    workingDir: /etc/nginx
+  - command:
+    - grafana-server
+    - web
+    env:
+    - name: PATH
+      value: /usr/share/grafana/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: HOSTNAME
+      value: Grafana
+    - name: container
+      value: podman
+    - name: GF_PATHS_CONFIG
+      value: /etc/grafana/grafana.ini
+    - name: GF_PATHS_PROVISIONING
+      value: /etc/grafana/provisioning
+    - name: GF_PATHS_DATA
+      value: /var/lib/grafana
+    - name: GF_PATHS_PLUGINS
+      value: /var/lib/grafana/plugins
+    - name: GF_PATHS_LOGS
+      value: /var/log/grafana
+    - name: VERSION
+      value: 7.0.3
+    - name: GF_PATHS_HOME
+      value: /usr/share/grafana
+    image: localhost/grafana:v0.1
+    name: promgrafana1
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities: {}
+      privileged: false
+      readOnlyRootFilesystem: false
+      runAsUser: 472
+    volumeMounts:
+    - mountPath: /etc/grafana/provisioning
+      name: var-data-grafana
+    workingDir: /usr/share/grafana/
+  - command:
+    - --config.file=/var/data/prometheus.yml
+    - --web.external-url=http://localhost/prometheus
+    env:
+    - name: PATH
+      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: HOSTNAME
+      value: Prometheus
+    - name: container
+      value: podman
+    - name: VERSION
+      value: 2.19.0
+    image: localhost/prometheus:v0.1
+    name: promprometheus1
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities: {}
+      privileged: false
+      readOnlyRootFilesystem: false
+      runAsUser: 2000
+    volumeMounts:
+    - mountPath: /var/data
+      name: var-data-prometheus
+    workingDir: /opt/prometheus/prometheus-2.19.0.linux-amd64
+  volumes:
+  - hostPath:
+      path: /etc/nginx/certs
+      type: Directory
+    name: etc-nginx-certs
+  - hostPath:
+      path: /var/data/grafana
+      type: Directory
+    name: var-data-grafana
+  - hostPath:
+      path: /var/data/prometheus
+      type: Directory
+    name: var-data-prometheus
+status: {}
